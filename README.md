@@ -59,6 +59,9 @@ node server/server.js
 
 # 4. Open in browser
 open http://localhost:3000
+
+# 5. If 3000 put is already in use
+lsof -ti:3000 | xargs kill -9
 ```
 
 The app runs on **port 3000** by default. Change it with:
