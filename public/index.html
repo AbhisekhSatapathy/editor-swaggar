@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="Swagger Editor – Write, validate, and preview OpenAPI specs in real-time. A premium developer tool." />
+    <title>Swagger Editor</title>
+
+    <!-- Swagger UI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
+
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css" />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="dark-theme">
+
+    <!-- Page Loader -->
+    <div id="page-loader" class="page-loader">
+        <div class="page-loader-inner">
+            <div class="page-loader-spinner"></div>
+            <span class="page-loader-text">Loading Swagger Editor…</span>
+        </div>
+    </div>
+
+    <!-- App Wrapper -->
+    <div id="app-wrapper">
+
+        <!-- ── Top Bar ────────────────────────────────────────────────────── -->
+        <header id="topbar">
+            <div class="topbar-left">
+                <svg class="logo-icon" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                </svg>
+                <h1>Swagger Editor</h1>
+            </div>
+
+            <div class="topbar-center">
+                <button id="btn-format" title="Auto-format YAML (prettify)">
+                    <i data-lucide="align-left" style="width:14px;height:14px"></i>
+                    <span>Format</span>
+                </button>
+                <button id="btn-clear" title="Clear editor contents">
+                    <i data-lucide="trash-2" style="width:14px;height:14px"></i>
+                    <span>Clear</span>
+                </button>
+                <div class="separator"></div>
+                <button id="btn-download-yaml" title="Download as YAML file">
+                    <i data-lucide="download" style="width:14px;height:14px"></i>
+                    <span>YAML</span>
+                </button>
+                <button id="btn-download-json" title="Download as JSON file">
+                    <i data-lucide="download" style="width:14px;height:14px"></i>
+                    <span>JSON</span>
+                </button>
+            </div>
+
+            <nav class="topbar-actions">
+                <!-- Theme Toggle Switch -->
+                <div id="theme-switch" class="theme-switch" title="Toggle dark/light theme">
+                    <div class="theme-switch-knob">
+                        <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="display:none">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- ── Main Content ──────────────────────────────────────────────── -->
+        <main id="main-content">
+            <!-- Left Panel – Editor -->
+            <section id="editor-panel">
+                <div id="editor-header">
+                    <span class="panel-title">
+                        <i data-lucide="code-2" style="width:13px;height:13px"></i>
+                        Editor
+                    </span>
+                    <span id="validation-badge" class="badge badge-ok">✓ Valid</span>
+                </div>
+                <!-- Search Bar (Ctrl+F / Cmd+F) -->
+                <div id="search-bar" class="search-bar" style="display:none">
+                    <div class="search-input-group">
+                        <svg class="search-icon" viewBox="0 0 24 24" width="14" height="14" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Find…" autocomplete="off"
+                            spellcheck="false" />
+                        <span id="search-counter" class="search-counter">No results</span>
+                    </div>
+                    <div class="search-toggles">
+                        <button id="search-toggle-case" class="search-toggle" title="Match Case (Alt+C)">Aa</button>
+                        <button id="search-toggle-word" class="search-toggle" title="Whole Word (Alt+W)">W</button>
+                        <button id="search-toggle-regex" class="search-toggle" title="Use Regex (Alt+R)">.*</button>
+                    </div>
+                    <div class="search-nav">
+                        <button id="search-prev" title="Previous match (Shift+Enter)">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="18 15 12 9 6 15" />
+                            </svg>
+                        </button>
+                        <button id="search-next" title="Next match (Enter)">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </button>
+                    </div>
+                    <button id="search-close" class="search-close" title="Close (Esc)">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="editor-container"></div>
+                <div id="error-console">
+                    <div id="error-console-header">
+                        <i data-lucide="alert-triangle" style="width:12px;height:12px"></i>
+                        <span>Problems</span>
+                        <span id="error-count" class="badge badge-error" style="display:none">0</span>
+                    </div>
+                    <pre id="error-output"></pre>
+                </div>
+            </section>
+
+            <!-- Resizer -->
+            <div id="resizer" title="Drag to resize panels"></div>
+
+            <!-- Right Panel – Preview -->
+            <section id="preview-panel">
+                <div id="preview-header">
+                    <span class="panel-title">
+                        <i data-lucide="book-open" style="width:13px;height:13px"></i>
+                        API Documentation
+                    </span>
+                    <div id="loading-spinner" class="spinner" style="display:none"></div>
+                </div>
+                <div id="swagger-ui-container"></div>
+            </section>
+        </main>
+
+        <!-- ── Footer ────────────────────────────────────────────────────── -->
+        <footer id="footer">
+            <div class="footer-left">© 2026 Abhisekh Satapathy. All Rights Reserved.</div>
+            <div class="footer-right">Built with passion for API developers 🚀</div>
+        </footer>
+
+    </div><!-- /app-wrapper -->
+
+    <!-- ── Toast Container ─────────────────────────────────────────────── -->
+    <div id="toast-container"></div>
+
+    <!-- ── Libraries ───────────────────────────────────────────────────── -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/yaml/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/yaml-lint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/indent-fold.min.js"></script>
+
+    <!-- App JS -->
+    <script src="app.js"></script>
+</body>
+
+</html>

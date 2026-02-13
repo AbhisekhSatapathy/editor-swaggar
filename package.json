@@ -1,0 +1,22 @@
+{
+    "name": "swagger-editor-clone",
+    "version": "1.0.0",
+    "description": "A Swagger Editor clone with live preview, YAML validation, and Try-it-out functionality",
+    "main": "server/server.js",
+    "scripts": {
+        "start": "node server/server.js",
+        "dev": "node server/server.js"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "http-proxy-middleware": "^2.0.6"
+    },
+    "keywords": [
+        "swagger",
+        "openapi",
+        "editor",
+        "api-documentation"
+    ],
+    "license": "MIT"
+}
